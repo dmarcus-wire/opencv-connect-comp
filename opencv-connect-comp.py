@@ -10,6 +10,7 @@
 import argparse
 import cv2
 
+#SETUP
 # construct the argument parser
 ap = argparse.ArgumentParser()
 ap.add_argument("-i","--image", required=True,
@@ -19,10 +20,11 @@ ap.add_argument("-c","--connectivity", type=int, default=4,
                 help="connectivity for connected component analysis")
 args = vars(ap.parse_args())
 
+#DATA_PRE_PROCESSING
 # load the input image from disk, convert it to grayscale and threshold it
-image = cv2.imread(args["image"]) # load to disk
+image = cv2.imread(args["image"]) # load image from disk
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # convert to grayscale
-thresh = cv2.threshold(gray, 0, 255, # use OTSU autothresholding to segment foreground from background
+thresh = cv2.threshold(gray, 0, 255, # use OTSU (Otsu's method) autothresholding to segment foreground from background
                        cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
 
 # show input grayscale of the license play
@@ -37,8 +39,8 @@ cv2.waitKey(0)
 # 3 params: binary image = threshold; connectivity type; datatype 32-bit short CV_32S
 # numLabels = total unique labels; labels = NxN integer map from thresh image; stats = startingX,Y, H and W, center X and Y coordinate
 output = cv2.connectedComponentsWithStats(
-    thresh, args["connectivity"], cv2.CV_32S)
-(numLabels, labels, stats, centroids) = output
+    thresh, args["connectivity"], cv2.CV_32S) # binary thresh image, connectivity command, datatype CV_32S
+(numLabels, labels, stats, centroids) = output # total # of unique labels, stats incl. bounding box, centroids/center of each component
 
 # loop over the number of unique connected component labels
 # id = 0 is the background, so we want to check and verify its the background

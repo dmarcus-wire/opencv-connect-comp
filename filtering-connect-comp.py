@@ -27,15 +27,12 @@ output = cv2.connectedComponentsWithStats(
     thresh, args["connectivity"], cv2.CV_32S)
 (numLabels, labels, stats, centroids) = output
 
-# init a output mask to store all (and just) the characters parsed from the plate
-# same spatial dimensions as grayscale
+# initializes an output mask to store all license plate characters we have found after performing connected component analysis.
 mask = np.zeros(gray.shape, dtype="uint8")
 
-# loop over the number of unique connected components,
-# skip over the first label as it is background
-# if i == 0  its the background, just start when i == 1
+# for loop starts from ID 1, implying that we are skipping over 0, our background value.
 for i in range(1, numLabels):
-    # extract the connected components statistics for the current label
+    # extract the bounding box coordinates and area of the current connected component
     x = stats[i, cv2.CC_STAT_LEFT]
     y = stats[i, cv2.CC_STAT_TOP]
     w = stats[i, cv2.CC_STAT_WIDTH]
@@ -44,16 +41,16 @@ for i in range(1, numLabels):
 
     # for each connected component drew the mask with waitkey call and print each stat variables
     # record w, h, area and determined the values for the keepW/H/A below
-    # print(x, y, h, area)
-    # componentMask = (labels == i).astype("uint8") * 255
-    # cv2.imshow("Mask", mask)
-    # cv2.waitKey(0)
+    print(x, y, h, area)
+    componentMask = (labels == i).astype("uint8") * 255
+    cv2.imshow("Mask", mask)
+    cv2.waitKey(0)
 
     # filter the components
     # ensure the w, h, and area are all neither too small or too big
-    keepWidth = w > 10 and w < 50 # original 5 and 50
-    keepHeight = h > 45 and h < 65
-    keepArea = area > 500 and area < 1500
+    keepWidth = w > 2 and w < 50 # original 5 and 50
+    keepHeight = h > 20 and h < 65 # original 45 and 65
+    keepArea = area > 200 and area < 1500 # original 500 and 1500
 
     # ensure the connected component we are examining passes for all 3 tests
     if all((keepWidth, keepHeight, keepArea)):
